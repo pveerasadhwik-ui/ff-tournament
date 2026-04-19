@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - FF Tournaments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+</head>
+<body class="results-page">
+    <nav class="navbar dashboard-nav">
+        <div class="logo">
+            <i class="fas fa-fire"></i>
+            <span>FF TOURNAMENTS</span>
+        </div>
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-trophy"></i> Matches
+            </a>
+            <a href="my-matches.html" class="nav-item">
+                <i class="fas fa-gamepad"></i> My Matches
+            </a>
+            <a href="results.html" class="nav-item active">
+                <i class="fas fa-medal"></i> Results
+            </a>
+        </div>
+        <div class="nav-right">
+            <div class="wallet">
+                <i class="fas fa-wallet"></i>
+                <span id="walletBalance">₹0</span>
+            </div>
+            <div class="user-menu">
+                <img src="[api.dicebear.com](https://api.dicebear.com/7.x/avataaars/svg?seed=player)" alt="User" class="user-avatar">
+                <span id="userName">Player</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="results-content">
+        <div class="results-header">
+            <h1><i class="fas fa-medal"></i> Match Results & Rewards</h1>
+        </div>
+
+        <div class="results-tabs">
+            <button class="tab-btn active" onclick="showTab('completed')">Completed</button>
+            <button class="tab-btn" onclick="showTab('rewards')">My Rewards</button>
+        </div>
+
+        <div class="tab-content" id="completedTab">
+            <div class="results-list" id="resultsList">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+
+        <div class="tab-content hidden" id="rewardsTab">
+            <div class="rewards-summary">
+                <div class="reward-stat">
+                    <i class="fas fa-trophy"></i>
+                    <span class="reward-value" id="totalWinnings">₹0</span>
+                    <span class="reward-label">Total Winnings</span>
+                </div>
+                <div class="reward-stat">
+                    <i class="fas fa-gamepad"></i>
+                    <span class="reward-value" id="matchesPlayed">0</span>
+                    <span class="reward-label">Matches Played</span>
+                </div>
+                <div class="reward-stat">
+                    <i class="fas fa-crosshairs"></i>
+                    <span class="reward-value" id="totalKills">0</span>
+                    <span class="reward-label">Total Kills</span>
+                </div>
+            </div>
+
+            <div class="rewards-history" id="rewardsHistory">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+
+        <!-- Sample Result Modal -->
+        <div class="modal" id="resultModal">
+            <div class="modal-content result-modal">
+                <button class="modal-close" onclick="closeResultModal()"><i class="fas fa-times"></i></button>
+                <div class="result-modal-content" id="resultModalContent">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Sample completed matches with results
+        const completedMatches = [
+            {
+                id: 101,
+                title: "SOLO SHOWDOWN #452",
+                mode: "solo",
+                map: "Bermuda",
+                date: "Today, 12:00 PM",
+                yourRank: 1,
+                yourKills: 8,
+                prizePool: 500,
+                perKill: 5,
+                winnings: 290,  // 250 (1st place) + 40 (8 kills * 5)
+                status: "credited"
+            },
+            {
+                id: 102,
+                title: "DUO DESTROYER #318",
+                mode: "duo",
+                map: "Purgatory",
+                date: "Yesterday, 4:30 PM",
+                yourRank: 5,
+                yourKills: 4,
+                prizePool: 1000,
+                perKill: 8,
+                winnings: 32,  // 4 kills * 8
+                status: "credited"
+            },
+            {
+                id: 103,
+                title: "SQUAD WARS #89",
+                mode: "squad",
+                map: "Kalahari",
+                date: "Yesterday, 9:00 PM",
+                yourRank: 2,
+                yourKills: 6,
+                prizePool: 2000,
+                perKill: 10,
+                winnings: 560,  // 500 (2nd place) + 60 (6 kills * 10)
+                status: "credited"
+            }
+        ];
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+        }
+
+        function loadResults() {
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsList.innerHTML = completedMatches.map(match => `
+                <div class="result-card" onclick="showResultDetails(${match.id})">
+                    <div class="result-left">
+                        <span class="match-mode ${match.mode}">${match.mode.toUpperCase()}</span>
+                        <div class="result-info">
+                            <h3>${match.title}</h3>
+                            <p><i class="fas fa-calendar"></i> ${match.date}</p>
+                        </div>
+                    </div>
+                    <div class="result-middle">
+                        <div class="result-stat">
+                            <span class="stat-icon ${getRankClass(match.yourRank)}">
+                                ${getRankIcon(match.yourRank)}
+                            </span>
+                            <span class="stat-label">Rank #${match.yourRank}</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-icon"><i class="fas fa-crosshairs"></i></span>
+                            <span class="stat-label">${match.yourKills} Kills</span>
+                        </div>
+                    </div>
+                    <div class="result-right">
+                        <span class="winnings">+₹${match.winnings}</span>
+                        <span class="status ${match.status}">${match.status === 'credited' ? '✓ Credited' : 'Pending'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getRankClass(rank) {
+            if (rank === 1) return 'gold';
+            if (rank === 2) return 'silver';
+            if (rank === 3) return 'bronze';
+            return '';
+        }
+
+        function getRankIcon(rank) {
+            if (rank === 1) return '🥇';
+            if (rank === 2) return '🥈';
+            if (rank === 3) return '🥉';
+            return `#${rank}`;
+        }
+
+        function showResultDetails(matchId) {
+            const match = completedMatches.find(m => m.id === matchId);
+            
+            document.getElementById('resultModalContent').innerHTML = `
+                <div class="result-celebration ${getRankClass(match.yourRank)}">
+                    <div class="rank-badge">${getRankIcon(match.yourRank)}</div>
+                    <h2>Rank #${match.yourRank}</h2>
+                </div>
+                
+                <h3>${match.title}</h3>
+                <p class="result-map"><i class="fas fa-map"></i> ${match.map} | ${match.date}</p>
+                
+                <div class="result-breakdown">
+                    <h4>Earnings Breakdown</h4>
+                    <div class="breakdown-row">
+                        <span>Position Reward (Rank #${match.yourRank})</span>
+                        <span>₹${match.yourRank === 1 ? Math.floor(match.prizePool * 0.5) : 
+                              match.yourRank === 2 ? Math.floor(match.prizePool * 0.25) : 
+                              match.yourRank === 3 ? Math.floor(match.prizePool * 0.15) : 0}</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Kill Reward (${match.yourKills} × ₹${match.perKill})</span>
+                        <span>₹${match.yourKills * match.perKill}</span>
+                    </div>
+                    <div class="breakdown-row total">
+                        <span>Total Winnings</span>
+                        <span>₹${match.winnings}</span>
+                    </div>
+                </div>
+                
+                <div class="result-status ${match.status}">
+                    <i class="fas fa-check-circle"></i>
+                    Amount has been credited to your wallet
+                </div>
+            `;
+            
+            document.getElementById('resultModal').classList.add('active');
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('active');
+        }
+
+        function loadRewards() {
+            const totalWinnings = completedMatches.reduce((sum, m) => sum + m.winnings, 0);
+            const totalKills = completedMatches.reduce((sum, m) => sum + m.yourKills, 0);
+            
+            document.getElementById('totalWinnings').textContent = '₹' + totalWinnings;
+            document.getElementById('matchesPlayed').textContent = completedMatches.length;
+            document.getElementById('totalKills').textContent = totalKills;
+            
+            const rewardsHistory = document.getElementById('rewardsHistory');
+            rewardsHistory.innerHTML = `
+                <h3>Recent Transactions</h3>
+                ${completedMatches.map(match => `
+                    <div class="transaction-row">
+                        <div class="transaction-left">
+                            <i class="fas fa-trophy ${getRankClass(match.yourRank)}"></i>
+                            <div>
+                                <strong>${match.title}</strong>
+                                <span>${match.date}</span>
+                            </div>
+                        </div>
+                        <span class="transaction-amount">+₹${match.winnings}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('ffUser'));
+            if (user) {
+                document.getElementById('userName').textContent = user.username;
+                document.getElementById('walletBalance').textContent = '₹' + (user.wallet || 0);
+            }
+            
+            loadResults();
+            loadRewards();
+        });
+    </script>
+</body>
+</html>

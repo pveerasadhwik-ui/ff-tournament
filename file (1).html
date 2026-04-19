@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - FF Tournaments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i></a>
+                <div class="logo">
+                    <i class="fas fa-fire"></i>
+                    <span>FF TOURNAMENTS</span>
+                </div>
+            </div>
+            
+            <h2>Create Account</h2>
+            <p class="auth-subtitle">Join thousands of players winning daily!</p>
+            
+            <form id="signupForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Username (In-Game Name)
+                    </label>
+                    <input type="text" id="username" name="username" placeholder="Enter your FF username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ffuid">
+                        <i class="fas fa-id-badge"></i> Free Fire UID
+                    </label>
+                    <input type="text" id="ffuid" name="ffuid" placeholder="Enter your Free Fire UID" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile">
+                        <i class="fas fa-mobile-alt"></i> Mobile Number
+                    </label>
+                    <div class="phone-input">
+                        <span class="country-code">+91</span>
+                        <input type="tel" id="mobile" name="mobile" placeholder="Enter 10 digit number" 
+                               pattern="[0-9]{10}" maxlength="10" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" 
+                               placeholder="Create a strong password" minlength="6" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="confirmPassword" name="confirmPassword" 
+                               placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#">Terms & Conditions</a></label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            const userData = {
+                username: document.getElementById('username').value,
+                ffuid: document.getElementById('ffuid').value,
+                mobile: document.getElementById('mobile').value,
+                password: password,
+                wallet: 0,
+                joinedMatches: [],
+                rewards: []
+            };
+            
+            // Store user data
+            localStorage.setItem('ffUser', JSON.stringify(userData));
+            localStorage.setItem('isLoggedIn', 'true');
+            
+            showToast('Account created successfully!', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

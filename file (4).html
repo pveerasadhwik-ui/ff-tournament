@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Details - FF Tournaments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+</head>
+<body class="room-page">
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-fire"></i>
+            <span>FF TOURNAMENTS</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Matches
+            </a>
+        </div>
+    </nav>
+
+    <main class="room-content">
+        <div class="success-animation">
+            <div class="checkmark">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Payment Successful!</h1>
+            <p>You have successfully joined the match</p>
+        </div>
+
+        <div class="room-card" id="roomCard">
+            <!-- Dynamic content -->
+        </div>
+
+        <div class="room-instructions">
+            <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+            <ol>
+                <li>Open Free Fire and go to <strong>Custom Room</strong></li>
+                <li>Click on <strong>"Join Room"</strong></li>
+                <li>Enter the <strong>Room ID</strong> and <strong>Password</strong> above</li>
+                <li>Wait in the lobby until the match starts</li>
+                <li>Play fair and follow all tournament rules</li>
+            </ol>
+        </div>
+
+        <div class="room-rules">
+            <h3><i class="fas fa-exclamation-triangle"></i> Rules</h3>
+            <ul>
+                <li>No teaming with other players</li>
+                <li>No use of hacks or cheats</li>
+                <li>Screen recording may be required for verification</li>
+                <li>Results will be declared within 30 minutes after match</li>
+                <li>Prize will be credited to your wallet</li>
+            </ul>
+        </div>
+
+        <a href="dashboard.html" class="btn btn-outline btn-large">
+            <i class="fas fa-trophy"></i> Browse More Matches
+        </a>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const match = JSON.parse(localStorage.getItem('currentMatch'));
+            
+            if (!match) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            document.getElementById('roomCard').innerHTML = `
+                <div class="room-header">
+                    <h2>${match.matchTitle}</h2>
+                    <span class="match-mode ${match.mode}">${match.mode.toUpperCase()}</span>
+                </div>
+                <div class="room-info">
+                    <div class="info-row">
+                        <i class="fas fa-map"></i>
+                        <span>Map: <strong>${match.map}</strong></span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-clock"></i>
+                        <span>Time: <strong>${match.time}</strong></span>
+                    </div>
+                </div>
+                <div class="room-credentials">
+                    <div class="credential">
+                        <label>Room ID</label>
+                        <div class="credential-value">
+                            <span id="roomId">${match.roomId}</span>
+                            <button onclick="copyToClipboard('${match.roomId}', 'Room ID')" class="copy-btn">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="credential">
+                        <label>Password</label>
+                        <div class="credential-value">
+                            <span id="roomPass">${match.roomPassword}</span>
+                            <button onclick="copyToClipboard('${match.roomPassword}', 'Password')" class="copy-btn">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="prize-reminder">
+                    <div class="prize-item">
+                        <i class="fas fa-trophy"></i>
+                        <span>Prize Pool: <strong>₹${match.prizePool}</strong></span>
+                    </div>
+                    <div class="prize-item">
+                        <i class="fas fa-crosshairs"></i>
+                        <span>Per Kill: <strong>₹${match.perKill}</strong></span>
+                    </div>
+                </div>
+            `;
+        });
+
+        function copyToClipboard(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`${label} copied!`, 'success');
+            });
+        }
+    </script>
+</body>
+</html>

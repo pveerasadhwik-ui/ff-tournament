@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournaments - FF Tournaments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+</head>
+<body class="dashboard-page">
+    <nav class="navbar dashboard-nav">
+        <div class="logo">
+            <i class="fas fa-fire"></i>
+            <span>FF TOURNAMENTS</span>
+        </div>
+        <div class="nav-center">
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fas fa-trophy"></i> Matches
+            </a>
+            <a href="my-matches.html" class="nav-item">
+                <i class="fas fa-gamepad"></i> My Matches
+            </a>
+            <a href="results.html" class="nav-item">
+                <i class="fas fa-medal"></i> Results
+            </a>
+        </div>
+        <div class="nav-right">
+            <div class="wallet">
+                <i class="fas fa-wallet"></i>
+                <span id="walletBalance">₹0</span>
+                <button class="btn btn-small btn-primary" onclick="addMoney()">+ Add</button>
+            </div>
+            <div class="user-menu">
+                <img src="[api.dicebear.com](https://api.dicebear.com/7.x/avataaars/svg?seed=player)" alt="User" class="user-avatar">
+                <span id="userName">Player</span>
+                <div class="dropdown">
+                    <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-content">
+        <div class="dashboard-header">
+            <h1><i class="fas fa-fire"></i> Live Tournaments</h1>
+            <div class="filters">
+                <select id="modeFilter">
+                    <option value="all">All Modes</option>
+                    <option value="solo">Solo</option>
+                    <option value="duo">Duo</option>
+                    <option value="squad">Squad</option>
+                </select>
+                <select id="entryFilter">
+                    <option value="all">All Entry Fees</option>
+                    <option value="free">Free</option>
+                    <option value="paid">Paid</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="matches-grid" id="matchesGrid">
+            <!-- Matches will be loaded dynamically -->
+        </div>
+    </main>
+
+    <!-- Join Match Modal -->
+    <div class="modal" id="joinModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h2>Join Match</h2>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Money Modal -->
+    <div class="modal" id="addMoneyModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAddMoneyModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h2><i class="fas fa-wallet"></i> Add Money to Wallet</h2>
+            </div>
+            <div class="modal-body">
+                <div class="amount-options">
+                    <button class="amount-btn" onclick="selectAmount(50)">₹50</button>
+                    <button class="amount-btn" onclick="selectAmount(100)">₹100</button>
+                    <button class="amount-btn" onclick="selectAmount(200)">₹200</button>
+                    <button class="amount-btn" onclick="selectAmount(500)">₹500</button>
+                </div>
+                <div class="form-group">
+                    <label>Or enter custom amount</label>
+                    <input type="number" id="customAmount" placeholder="Enter amount" min="10">
+                </div>
+                <button class="btn btn-primary btn-full" onclick="processAddMoney()">
+                    <i class="fas fa-plus"></i> Add Money
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Check if logged in
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Sample matches data
+        const matches = [
+            {
+                id: 1,
+                title: "SOLO SHOWDOWN",
+                mode: "solo",
+                map: "Bermuda",
+                entryFee: 10,
+                prizePool: 500,
+                perKill: 5,
+                slots: 48,
+                filledSlots: 32,
+                time: "Today, 3:00 PM",
+                status: "upcoming"
+            },
+            {
+                id: 2,
+                title: "DUO DESTROYER",
+                mode: "duo",
+                map: "Purgatory",
+                entryFee: 20,
+                prizePool: 1000,
+                perKill: 8,
+                slots: 24,
+                filledSlots: 18,
+                time: "Today, 4:30 PM",
+                status: "upcoming"
+            },
+            {
+                id: 3,
+                title: "SQUAD WARS",
+                mode: "squad",
+                map: "Kalahari",
+                entryFee: 40,
+                prizePool: 2000,
+                perKill: 10,
+                slots: 12,
+                filledSlots: 8,
+                time: "Today, 6:00 PM",
+                status: "upcoming"
+            },
+            {
+                id: 4,
+                title: "FREE ENTRY BATTLE",
+                mode: "solo",
+                map: "Bermuda",
+                entryFee: 0,
+                prizePool: 100,
+                perKill: 2,
+                slots: 48,
+                filledSlots: 45,
+                time: "Today, 7:30 PM",
+                status: "upcoming"
+            },
+            {
+                id: 5,
+                title: "PREMIUM SQUAD CUP",
+                mode: "squad",
+                map: "Alpine",
+                entryFee: 100,
+                prizePool: 5000,
+                perKill: 20,
+                slots: 12,
+                filledSlots: 6,
+                time: "Today, 9:00 PM",
+                status: "upcoming"
+            },
+            {
+                id: 6,
+                title: "MIDNIGHT MAYHEM",
+                mode: "duo",
+                map: "Bermuda",
+                entryFee: 30,
+                prizePool: 1500,
+                perKill: 12,
+                slots: 24,
+                filledSlots: 20,
+                time: "Today, 11:00 PM",
+                status: "upcoming"
+            }
+        ];
+
+        // Load matches
+        function loadMatches(filter = 'all') {
+            const grid = document.getElementById('matchesGrid');
+            const modeFilter = document.getElementById('modeFilter').value;
+            const entryFilter = document.getElementById('entryFilter').value;
+            
+            let filteredMatches = matches;
+            
+            if (modeFilter !== 'all') {
+                filteredMatches = filteredMatches.filter(m => m.mode === modeFilter);
+            }
+            
+            if (entryFilter === 'free') {
+                filteredMatches = filteredMatches.filter(m => m.entryFee === 0);
+            } else if (entryFilter === 'paid') {
+                filteredMatches = filteredMatches.filter(m => m.entryFee > 0);
+            }
+            
+            grid.innerHTML = filteredMatches.map(match => `
+                <div class="match-card ${match.mode}">
+                    <div class="match-header">
+                        <span class="match-mode ${match.mode}">${match.mode.toUpperCase()}</span>
+                        <span class="match-map"><i class="fas fa-map"></i> ${match.map}</span>
+                    </div>
+                    <h3 class="match-title">${match.title}</h3>
+                    <div class="match-details">
+                        <div class="detail">
+                            <i class="fas fa-trophy"></i>
+                            <span>Prize Pool</span>
+                            <strong>₹${match.prizePool}</strong>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-crosshairs"></i>
+                            <span>Per Kill</span>
+                            <strong>₹${match.perKill}</strong>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Entry Fee</span>
+                            <strong>${match.entryFee === 0 ? 'FREE' : '₹' + match.entryFee}</strong>
+                        </div>
+                    </div>
+                    <div class="match-slots">
+                        <div class="slots-bar">
+                            <div class="slots-fill" style="width: ${(match.filledSlots/match.slots)*100}%"></div>
+                        </div>
+                        <span>${match.filledSlots}/${match.slots} Joined</span>
+                    </div>
+                    <div class="match-time">
+                        <i class="fas fa-clock"></i> ${match.time}
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="openJoinModal(${match.id})">
+                        ${match.entryFee === 0 ? '<i class="fas fa-gamepad"></i> Join Free' : '<i class="fas fa-rupee-sign"></i> Join @ ₹' + match.entryFee}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Open join modal
+        function openJoinModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            const user = JSON.parse(localStorage.getItem('ffUser'));
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="join-match-info">
+                    <h3>${match.title}</h3>
+                    <div class="match-summary">
+                        <p><strong>Mode:</strong> ${match.mode.toUpperCase()}</p>
+                        <p><strong>Map:</strong> ${match.map}</p>
+                        <p><strong>Time:</strong> ${match.time}</p>
+                        <p><strong>Entry Fee:</strong> ${match.entryFee === 0 ? 'FREE' : '₹' + match.entryFee}</p>
+                    </div>
+                    <div class="prize-breakdown">
+                        <h4><i class="fas fa-gift"></i> Prize Breakdown</h4>
+                        <ul>
+                            <li><span>🥇 1st Place:</span> <strong>₹${Math.floor(match.prizePool * 0.5)}</strong></li>
+                            <li><span>🥈 2nd Place:</span> <strong>₹${Math.floor(match.prizePool * 0.25)}</strong></li>
+                            <li><span>🥉 3rd Place:</span> <strong>₹${Math.floor(match.prizePool * 0.15)}</strong></li>
+                            <li><span>💀 Per Kill:</span> <strong>₹${match.perKill}</strong></li>
+                        </ul>
+                    </div>
+                    <div class="your-details">
+                        <h4><i class="fas fa-user"></i> Your Details</h4>
+                        <p><strong>Username:</strong> ${user.username}</p>
+                        <p><strong>FF UID:</strong> ${user.ffuid}</p>
+                    </div>
+                    ${match.entryFee > 0 ? `
+                        <div class="payment-section">
+                            <p class="wallet-balance">Wallet Balance: <strong>₹${user.wallet || 0}</strong></p>
+                            ${(user.wallet || 0) >= match.entryFee ? 
+                                `<button class="btn btn-primary btn-full" onclick="joinMatch(${match.id})">
+                                    <i class="fas fa-check"></i> Pay ₹${match.entryFee} & Join
+                                </button>` :
+                                `<p class="insufficient">Insufficient balance!</p>
+                                <button class="btn btn-primary btn-full" onclick="closeModal(); addMoney();">
+                                    <i class="fas fa-wallet"></i> Add Money to Wallet
+                                </button>`
+                            }
+                        </div>
+                    ` : `
+                        <button class="btn btn-primary btn-full" onclick="joinMatch(${match.id})">
+                            <i class="fas fa-gamepad"></i> Join Match
+                        </button>
+                    `}
+                </div>
+            `;
+            
+            document.getElementById('joinModal').classList.add('active');
+        }
+
+        // Join match
+        function joinMatch(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            const user = JSON.parse(localStorage.getItem('ffUser'));
+            
+            if (match.entryFee > 0) {
+                user.wallet = (user.wallet || 0) - match.entryFee;
+            }
+            
+            // Generate room details
+            const roomDetails = {
+                matchId: matchId,
+                matchTitle: match.title,
+                roomId: generateRoomId(),
+                roomPassword: generatePassword(),
+                time: match.time,
+                map: match.map,
+                mode: match.mode,
+                prizePool: match.prizePool,
+                perKill: match.perKill
+            };
+            
+            // Save to user's joined matches
+            user.joinedMatches = user.joinedMatches || [];
+            user.joinedMatches.push(roomDetails);
+            localStorage.setItem('ffUser', JSON.stringify(user));
+            
+            // Store current match for room details page
+            localStorage.setItem('currentMatch', JSON.stringify(roomDetails));
+            
+            closeModal();
+            showToast('Successfully joined the match!', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'room-details.html';
+            }, 1000);
+        }
+
+        function generateRoomId() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let password = '';
+            for (let i = 0; i < 6; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
+
+        function closeModal() {
+            document.getElementById('joinModal').classList.remove('active');
+        }
+
+        function addMoney() {
+            document.getElementById('addMoneyModal').classList.add('active');
+        }
+
+        function closeAddMoneyModal() {
+            document.getElementById('addMoneyModal').classList.remove('active');
+        }
+
+        let selectedAmount = 0;
+        function selectAmount(amount) {
+            selectedAmount = amount;
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('customAmount').value = amount;
+        }
+
+        function processAddMoney() {
+            const customAmount = document.getElementById('customAmount').value;
+            const amount = customAmount ? parseInt(customAmount) : selectedAmount;
+            
+            if (amount < 10) {
+                showToast('Minimum amount is ₹10', 'error');
+                return;
+            }
+            
+            // Simulate payment - in production, integrate with Razorpay/Paytm
+            const user = JSON.parse(localStorage.getItem('ffUser'));
+            user.wallet = (user.wallet || 0) + amount;
+            localStorage.setItem('ffUser', JSON.stringify(user));
+            
+            document.getElementById('walletBalance').textContent = '₹' + user.wallet;
+            closeAddMoneyModal();
+            showToast(`₹${amount} added to wallet!`, 'success');
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('ffUser'));
+            if (user) {
+                document.getElementById('userName').textContent = user.username;
+                document.getElementById('walletBalance').textContent = '₹' + (user.wallet || 0);
+            }
+            
+            loadMatches();
+            
+            document.getElementById('modeFilter').addEventListener('change', loadMatches);
+            document.getElementById('entryFilter').addEventListener('change', loadMatches);
+        });
+    </script>
+</body>
+</html>
